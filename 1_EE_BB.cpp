@@ -15,11 +15,11 @@ int flag,totalnum,gap;;
 cout<<"restar (1) or not (0)"<<endl;
 cin>>flag;
 ifstream infile;
-double py,k,k_A,a0,y0,t0,Ci;
+double py,k,k_A,a0,y0,t0,Ci,k_perp=2.0,TT=10000;
 if(flag==0){
   cout<< "please input the time step you want to store the data"<<endl;
   cin>>gap;
-py=8;k=0.3;k_A=0.5;a0=1.0;y0=0.0;t0=0.0;}
+py=3;k=1;k_A=0;a0=2.5;y0=3.14159/2.0/k_perp;t0=0.0;k_perp=2.0;}
 else{
 infile.open("restart.txt");
 infile>>a0;
@@ -47,10 +47,11 @@ pyta.push_back(py);
 Xi.push_back(kesi);
 Ay=a0*sin(kesi);
 
-w_posi=k*y0*y0/2.0+k_A*y0*y0/2.0;
-w_neg=k*y0*y0/2.0-k_A*y0*y0/2.0;
+w_posi=k*cos(k_perp*y0)*cos(k_perp*y0)+k_A*y0*y0/2.0;
+w_neg=k*cos(k_perp*y0)*cos(k_perp*y0)-k_A*y0*y0/2.0;
+
 //Ci=sqrt(1+py*py)+w_posi;
-Ci=8.0;
+Ci=8;
 energy[0]=0.5*((1+(py+Ay)*(py+Ay))/(Ci-w_posi)+w_neg);
 allenergy.push_back(energy[0]);
 double b[2]={0},x_next[2]={0},dfdx[2][2]={0},f[2]={0},diff[2]={0};
@@ -62,29 +63,40 @@ outfile<<"k "<<k<<endl;
 outfile<<"h "<<h<<endl;
 outfile<<"gap "<<gap<<endl;
 outfile<<"k_A "<<k_A<<endl;
+outfile<<"Ci " <<Ci<<endl;
 outfile.close();
 
 int gapp=0;
-while(num<N){
+while(num<N&&kesi<TT){
   y_n=y0;
   py_n=py;
   Ay=a0*sin(kesi);
-  w_posi=k*y0*y0/2.0+k_A*y0*y0/2.0;
-  w_neg=k*y0*y0/2.0-k_A*y0*y0/2.0;
-  dw_posi=k*y0+k_A*y0;
-  dw_neg=k*y0-k_A*y0;
+  w_posi=k*cos(k_perp*y0)*cos(k_perp*y0)+k_A*y0*y0/2.0;
+  w_neg=k*cos(k_perp*y0)*cos(k_perp*y0)-k_A*y0*y0/2.0;
+ // w_neg=k*y0*y0/2.0-k_A*y0*y0/2.0;
+  dw_posi=-2.0*k*cos(k_perp*y0)*sin(k_perp*y0)*k_perp+k_A*y0;
+  dw_neg=-2.0*k*cos(k_perp*y0)*sin(k_perp*y0)*k_perp-k_A*y0;
+  //dw_neg=k*y0-k_A*y0;
   b[0]=py-h/4*((1+(py+Ay)*(py+Ay))/((Ci-w_posi)*(Ci-w_posi))*dw_posi+dw_neg);
   b[1]=y0+h/2.0*(py+Ay)/(Ci-w_posi);
   while(1){
-    w_posi=k*y0*y0/2.0+k_A*y0*y0/2.0;
-    w_neg=k*y0*y0/2.0-k_A*y0*y0/2.0;
-    dw_posi=k*y0+k_A*y0;
-    dw_neg=k*y0-k_A*y0;
-    dw2_posi=k+k_A;
-    dw2_neg=k-k_A;
+  //  w_posi=k*y0*y0/2.0+k_A*y0*y0/2.0;
+   // w_neg=k*y0*y0/2.0-k_A*y0*y0/2.0;
+
+
+  w_posi=k*cos(k_perp*y0)*cos(k_perp*y0)+k_A*y0*y0/2.0;
+  w_neg=k*cos(k_perp*y0)*cos(k_perp*y0)+k_A*y0*y0/2.0;
+
+  dw_posi=-2.0*k*cos(k_perp*y0)*sin(k_perp*y0)*k_perp+k_A*y0;
+  dw_neg=-2.0*k*cos(k_perp*y0)*sin(k_perp*y0)*k_perp-k_A*y0;
+  //dw_posi=-2.0*k*cos(k_perp*y0)*sin(k_perp*y0)*k_perp+k_A*y0;
+   // dw_neg=k*y0-k_A*y0;
+    dw2_posi=-2.0*k*k_perp*k_perp*cos(2.0*k_perp*y0)+k_A;
+    dw2_neg=-2.0*k*k_perp*k_perp*cos(2.0*k_perp*y0)+k_A;
+    //dw2_neg=k-k_A;
     f[0]=py+h/4*((1+(py+Ay)*(py+Ay))/((Ci-w_posi)*(Ci-w_posi))*dw_posi+dw_neg);
     f[1]=y0-h/2.0*(py+Ay)/(Ci-w_posi);
-    dfdx[0][0]=h/4*(1+(py+Ay)*(py+Ay))/((Ci-w_posi)*(Ci-w_posi))*dw2_posi+h/4*2.0*(1+(py+Ay)*(py+Ay))/pow((Ci-w_posi),3)*dw_posi*dw_posi
+    dfdx[0][0]=h/4*(1+(py+Ay)*(py+Ay))/((Ci-w_posi)*(Ci-w_posi))*dw2_posi+h/4*2.0*(1+(py+Ay)*(py+Ay))/pow((Ci-w_posi),3)*dw_posi
                +h/4.0*dw2_neg;
     dfdx[0][1]=1.0+h/2*(py+Ay)/((Ci-w_posi)*(Ci-w_posi))*dw_posi;
     dfdx[1][0]=1.0-h/2*(py+Ay)/((Ci-w_posi)*(Ci-w_posi))*dw_posi;
@@ -100,24 +112,29 @@ while(num<N){
     y0=x_next[0];
     py=x_next[1];
   }
- // gapp+=1;
+/*
+  gapp+=1;
 
- /* if(gapp=gap){
+  if(gapp=gap){
   y.push_back(y0);
   pyta.push_back(py);
   Xi.push_back(kesi);
 //cout<<"test"<<endl;
 Ay=a0*sin(kesi);
-w_posi=k*y0*y0/2.0+k_A*y0*y0/2.0;
-w_neg=k*y0*y0/2.0-k_A*y0*y0/2.0;
+//w_posi=k*y0*y0/2.0+k_A*y0*y0/2.0;
+  w_posi=k*cos(k_perp*y0)*cos(k_perp*y0)+k_A*y0*y0/2.0;
+  w_neg=k*cos(k_perp*y0)*cos(k_perp*y0)+k_A*y0*y0/2.0;
+//w_neg=k*y0*y0/2.0-k_A*y0*y0/2.0;
 E0=0.5*((1+(py+Ay)*(py+Ay))/(Ci-w_posi)+w_neg);
 allenergy.push_back(E0);
-  gapp=0;*/
-
+  gapp=0;
+}*/
    if(py*py_n<0){
      Ay=a0*sin(kesi);
-     w_posi=k*y0*y0/2.0+k_A*y0*y0/2.0;
-     w_neg=k*y0*y0/2.0-k_A*y0*y0/2.0;
+  w_posi=k*cos(k_perp*y0)*cos(k_perp*y0)+k_A*y0*y0/2.0;
+  w_neg=k*cos(k_perp*y0)*cos(k_perp*y0)+k_A*y0*y0/2.0;
+  //   w_posi=k*y0*y0/2.0+k_A*y0*y0/2.0;
+   //  w_neg=k*y0*y0/2.0-k_A*y0*y0/2.0;
      energy[num]=0.5*((1+(py+Ay)*(py+Ay))/(Ci-w_posi)+w_neg);
 
      Kessi[num]=kesi;
