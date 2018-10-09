@@ -20,7 +20,7 @@ int main()
 
   cout<< "please input the time step you want to store the data"<<endl;
   cin>>gap;
-  del=1;k=0.3,k_A=0.5;a0=0.5;z0=0;t0=0.0;}
+ del=65;k=0.5,k_A=0;a0=1;z0=0;t0=0.0;}
   else{
   infile.open("restart.txt");
   infile>>a0;
@@ -35,7 +35,7 @@ int main()
   cout<<"please input your expected points in mapping"<<endl;
   cin>>totalnum;
 
-double h=0.0001,kesi=t0,E0;
+double h=0.00005,kesi=t0,E0;
 int num=1,N=totalnum;
 double Kessi[N],energy[N],Ax,Ab,Uz,dAb,dUz,d2Ab,d2Uz;
 vector<double> z;
@@ -47,7 +47,7 @@ z.push_back(z0);
 delta.push_back(del);
 Xi.push_back(kesi);
 Ax=a0*sin(kesi);
-Ab=k_A*z0*z0/2.0;
+Ab=k_A*z0;
 Uz=k*z0*z0/2.0;
 energy[0]=0.5*(1+(Cx+Ax+Ab)*(Cx+Ax+Ab))/del+del/2.0+Uz;
 allenergy.push_back(energy[0]);
@@ -69,19 +69,19 @@ while(num<N){
   z_n=z0;
   del_n=del;
   Ax=a0*sin(kesi);
-  Ab=k_A*z0*z0/2.0;
+  Ab=k_A*z0;
   Uz=k*z0*z0/2.0;
-  dAb=k_A*z0;
+  dAb=k_A;
   dUz=k*z0;
   b[0]=del+h/2.0*(dUz+(Cx+Ax+Ab)*dAb/del);
   b[1]=z0-h/2.0+h/4.0/(del*del)*(1.0+(Cx+Ax+Ab)*(Cx+Ax+Ab));
   while(1){
     Ax=a0*sin(kesi);
-    Ab=k_A*z0*z0/2.0;
+    Ab=k_A*z0;
     Uz=k*z0*z0/2.0;
-    dAb=k_A*z0;
+    dAb=k_A;
     dUz=k*z0;
-    d2Ab=k_A;
+    d2Ab=0;
     d2Uz=k;
     f[0]=del-h/2.0*(dUz+(Cx+Ax+Ab)*dAb/del);
     f[1]=z0-h/4.0/(del*del)*(1.0+(Cx+Ax+Ab)*(Cx+Ax+Ab));
@@ -100,22 +100,22 @@ while(num<N){
     z0=x_next[0];
     del=x_next[1];
   }
-/*  gapp+=1;
+  gapp+=1;
   if(gapp==gap){
   z.push_back(z0);
   delta.push_back(del);
     Xi.push_back(kesi);
     Ax=a0*sin(kesi);
-    Ab=k_A*z0*z0/2.0;
+    Ab=k_A*z0;
     Uz=k*z0*z0/2.0;
   E0=0.5*(1+(Cx+Ax+Ab)*(Cx+Ax+Ab))/del+del/2.0+Uz;
   allenergy.push_back(E0);
   gapp=0;
-}*/
+}
 
-   if(z0*z_n<0&&z_n<0){
+   if(z0*z_n<0&z_n<0){
      Ax=a0*sin(kesi);
-     Ab=k_A*z0*z0/2.0;
+     Ab=k_A*z0;
      Uz=k*z0*z0/2.0;
      energy[num]=0.5*(1+(Cx+Ax+Ab)*(Cx+Ax+Ab))/del+del/2.0+Uz;
 
@@ -138,22 +138,22 @@ outfile.open("energy.txt");
 for(int i=0;i<N;i++){
 outfile<<energy[i]<<endl;}
 outfile.close();
-/*outfile.open("z.txt");
-for(int i=0;i<z.size()/gap-1;i++){
-  outfile<<z[i*gap]<<endl;}
+outfile.open("z.txt");
+for(int i=0;i<z.size();i++){
+  outfile<<z[i]<<endl;}
 outfile.close();
 outfile.open("delta.txt");
-for(int i=0;i<z.size()/gap-1;i++){
-  outfile<<delta[i*gap]<<endl;}
+for(int i=0;i<z.size();i++){
+  outfile<<delta[i]<<endl;}
 outfile.close();
 outfile.open("allenergy.txt");
-for(int j=0;j<z.size()/gap-1;j++){
-  outfile<<allenergy[j*gap]<<endl;}
+for(int j=0;j<z.size();j++){
+  outfile<<allenergy[j]<<endl;}
 outfile.close();
 outfile.open("AllXi.txt");
-for(int j=0;j<z.size()/gap-1;j++){
-  outfile<<Xi[j*gap]<<endl;}
-outfile.close();*/
+for(int j=0;j<z.size();j++){
+  outfile<<Xi[j]<<endl;}
+outfile.close();
 }
 else{
   outfile.open("Xi.txt",ios::app);

@@ -15,11 +15,11 @@ int flag,totalnum,gap;;
 cout<<"restar (1) or not (0)"<<endl;
 cin>>flag;
 ifstream infile;
-double py,k,k_A,a0,y0,t0,Ci;
+double py,k,k_A,a0,y0,t0,Ci,phi_max=0,B0;
 if(flag==0){
   cout<< "please input the time step you want to store the data"<<endl;
   cin>>gap;
-py=8;k=0.3;k_A=0.5;a0=1.0;y0=0.0;t0=0.0;}
+py=25;k=0.00001;B0=0.03;k_A=0.;a0=1;y0=0.0;t0=0;}
 else{
 infile.open("restart.txt");
 infile>>a0;
@@ -34,7 +34,7 @@ infile.close();
 }
 cout<<"please input your expected points in mapping"<<endl;
 cin>>totalnum;
-double h=0.0001,kesi=t0,E0;
+double h=0.00005,kesi=t0,E0;
 int num=1,N=totalnum;
 double Kessi[N],energy[N],Ay,w_posi,w_neg,dw_posi,dw_neg,dw2_posi,dw2_neg;
 vector<double> y;
@@ -50,8 +50,8 @@ Ay=a0*sin(kesi);
 w_posi=k*y0*y0/2.0+k_A*y0*y0/2.0;
 w_neg=k*y0*y0/2.0-k_A*y0*y0/2.0;
 //Ci=sqrt(1+py*py)+w_posi;
-Ci=8.0;
-energy[0]=0.5*((1+(py+Ay)*(py+Ay))/(Ci-w_posi)+w_neg);
+Ci=1;
+energy[0]=0.5*((1+(py+Ay)*(py+Ay)+B0*B0*y0*y0)/(Ci-w_posi)+w_neg);
 allenergy.push_back(energy[0]);
 double b[2]={0},x_next[2]={0},dfdx[2][2]={0},f[2]={0},diff[2]={0};
 double y_n,py_n,b1,b2;
@@ -73,7 +73,7 @@ while(num<N){
   w_neg=k*y0*y0/2.0-k_A*y0*y0/2.0;
   dw_posi=k*y0+k_A*y0;
   dw_neg=k*y0-k_A*y0;
-  b[0]=py-h/4*((1+(py+Ay)*(py+Ay))/((Ci-w_posi)*(Ci-w_posi))*dw_posi+dw_neg);
+  b[0]=py-h/4*((1+(py+Ay)*(py+Ay)+B0*B0*y0*y0)/((Ci-w_posi)*(Ci-w_posi))*dw_posi+dw_neg+2*B0*y0/(Ci-w_posi)*B0);
   b[1]=y0+h/2.0*(py+Ay)/(Ci-w_posi);
   while(1){
     w_posi=k*y0*y0/2.0+k_A*y0*y0/2.0;
@@ -82,10 +82,12 @@ while(num<N){
     dw_neg=k*y0-k_A*y0;
     dw2_posi=k+k_A;
     dw2_neg=k-k_A;
-    f[0]=py+h/4*((1+(py+Ay)*(py+Ay))/((Ci-w_posi)*(Ci-w_posi))*dw_posi+dw_neg);
+    f[0]=py+h/4*((1+(py+Ay)*(py+Ay)+B0*B0*y0*y0)/((Ci-w_posi)*(Ci-w_posi))*dw_posi+dw_neg+2*B0*y0/(Ci-w_posi)*B0);
     f[1]=y0-h/2.0*(py+Ay)/(Ci-w_posi);
-    dfdx[0][0]=h/4*(1+(py+Ay)*(py+Ay))/((Ci-w_posi)*(Ci-w_posi))*dw2_posi+h/4*2.0*(1+(py+Ay)*(py+Ay))/pow((Ci-w_posi),3)*dw_posi*dw_posi
-               +h/4.0*dw2_neg;
+
+    dfdx[0][0]=h/4*(1+(py+Ay)*(py+Ay)+B0*B0*y0*y0)/((Ci-w_posi)*(Ci-w_posi))*dw2_posi+h/4*2.0*(1+(py+Ay)*(py+Ay)+B0*B0*y0*y0)/pow((Ci-w_posi),3)*dw_posi*dw_posi
+               +h/4.0*dw2_neg+h/2.0*B0*B0/(Ci-w_posi)+h/2.0*B0*B0*y0/pow((Ci-w_posi),2)*dw_posi+h/4*(2.0*B0*B0*y0)/((Ci-w_posi)*(Ci-w_posi))*dw_posi;
+
     dfdx[0][1]=1.0+h/2*(py+Ay)/((Ci-w_posi)*(Ci-w_posi))*dw_posi;
     dfdx[1][0]=1.0-h/2*(py+Ay)/((Ci-w_posi)*(Ci-w_posi))*dw_posi;
     dfdx[1][1]=-h/2.0/(Ci-w_posi);
@@ -100,9 +102,9 @@ while(num<N){
     y0=x_next[0];
     py=x_next[1];
   }
- // gapp+=1;
+  gapp+=1;
 
- /* if(gapp=gap){
+  if(gapp==gap){
   y.push_back(y0);
   pyta.push_back(py);
   Xi.push_back(kesi);
@@ -110,15 +112,16 @@ while(num<N){
 Ay=a0*sin(kesi);
 w_posi=k*y0*y0/2.0+k_A*y0*y0/2.0;
 w_neg=k*y0*y0/2.0-k_A*y0*y0/2.0;
-E0=0.5*((1+(py+Ay)*(py+Ay))/(Ci-w_posi)+w_neg);
+E0=0.5*((1+(py+Ay)*(py+Ay)+B0*B0*y0*y0)/(Ci-w_posi)+w_neg);
 allenergy.push_back(E0);
-  gapp=0;*/
-
-   if(py*py_n<0){
+if(phi_max<E0) phi_max=E0;  
+gapp=0;
+}
+   if(y0*y_n<0){
      Ay=a0*sin(kesi);
      w_posi=k*y0*y0/2.0+k_A*y0*y0/2.0;
      w_neg=k*y0*y0/2.0-k_A*y0*y0/2.0;
-     energy[num]=0.5*((1+(py+Ay)*(py+Ay))/(Ci-w_posi)+w_neg);
+     energy[num]=0.5*((1+(py+Ay)*(py+Ay)+B0*B0*y0*y0)/(Ci-w_posi)+w_neg);
 
      Kessi[num]=kesi;
 
@@ -126,9 +129,9 @@ allenergy.push_back(E0);
     num+=1;
    }
   kesi=kesi+h;
-//cout<<kesi<<endl;
-}
 
+}
+cout<< pyta.size()<<endl;
 if(flag==0){
 outfile.open("Xi.txt");
 for(int i=0;i<N;i++){
@@ -140,7 +143,7 @@ outfile.open("energy.txt");
 for(int i=0;i<N;i++){
 outfile<<energy[i]<<endl;}
 outfile.close();
-/*outfile.open("z.txt");
+outfile.open("z.txt");
 for(int i=0;i<y.size();i++){
   outfile<<y[i]<<endl;}
 outfile.close();
@@ -155,7 +158,7 @@ outfile.close();
 outfile.open("AllXi.txt");
 for(int j=0;j<y.size();j++){
   outfile<<Xi[j]<<endl;}
-outfile.close();*/
+outfile.close();
 }
 else{
   outfile.open("Xi.txt",ios::app);
@@ -197,6 +200,6 @@ outfile<<y0<<endl;
 outfile<<Ci<<endl;
 outfile<<gap<<endl;
 outfile.close();
-
+cout<<"phi_max is " <<phi_max<<endl;
 
 }

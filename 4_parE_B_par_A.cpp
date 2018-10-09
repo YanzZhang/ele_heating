@@ -20,7 +20,7 @@ int main()
 
   cout<< "please input the time step you want to store the data"<<endl;
   cin>>gap;
-  del=1;k=0.3,k_A=0.5;a0=1;z0=0;t0=0.0;}
+  del=30;k=0.5,k_A=0.1;a0=1;z0=0;t0=0.0;}
   else{
   infile.open("restart.txt");
   infile>>a0;
@@ -35,7 +35,7 @@ int main()
   cout<<"please input your expected points in mapping"<<endl;
   cin>>totalnum;
 
-double h=0.0001,kesi=t0,E0;
+double h=0.00005,kesi=t0,E0;
 int num=1,N=totalnum;
 double Kessi[N],energy[N],Ax,Ab,Uz,dAb,dUz,d2Ab,d2Uz;
 vector<double> z;
@@ -115,7 +115,7 @@ while(num<N){
   gapp=0;
 }*/
 
-   if(z0*z_n<0){
+   if(z0*z_n<0&z_n<0){
      Ax=a0*sin(kesi);
      Ab=k_A*z0*z0/2.0;
      Uz=k*z0*z0/2.0;
@@ -141,20 +141,20 @@ for(int i=0;i<N;i++){
 outfile<<energy[i]<<endl;}
 outfile.close();
 /*outfile.open("z.txt");
-for(int i=0;i<z.size();i++){
-  outfile<<z[i]<<endl;}
+for(int i=0;i<z.size()/gap-1;i++){
+  outfile<<z[i*gap]<<endl;}
 outfile.close();
 outfile.open("delta.txt");
-for(int i=0;i<z.size();i++){
-  outfile<<delta[i]<<endl;}
+for(int i=0;i<z.size()/gap-1;i++){
+  outfile<<delta[i*gap]<<endl;}
 outfile.close();
 outfile.open("allenergy.txt");
-for(int j=0;j<z.size();j++){
-  outfile<<allenergy[j]<<endl;}
+for(int j=0;j<z.size()/gap-1;j++){
+  outfile<<allenergy[j*gap]<<endl;}
 outfile.close();
 outfile.open("AllXi.txt");
-for(int j=0;j<z.size();j++){
-  outfile<<Xi[j]<<endl;}
+for(int j=0;j<z.size()/gap-1;j++){
+  outfile<<Xi[j*gap]<<endl;}
 outfile.close();*/
 }
 else{
