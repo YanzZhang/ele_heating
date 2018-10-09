@@ -19,7 +19,7 @@ double py,k,k_A,a0,y0,t0,Ci;
 if(flag==0){
   cout<< "please input the time step you want to store the data"<<endl;
   cin>>gap;
-py=8;k=0.3;k_A=0.5;a0=1.0;y0=0;t0=0.0;}
+py=5;k=0.3;k_A=0.5;a0=1.0;y0=0;t0=0.0;}
 else{
 infile.open("restart.txt");
 infile>>a0;
